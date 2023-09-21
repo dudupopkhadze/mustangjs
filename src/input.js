@@ -1,1 +1,2 @@
-Deno.core.print("Hello runjs!\n");
+console.log("console tests");
+console.error("console error");

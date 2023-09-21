@@ -10,12 +10,19 @@ fn get_main_module(file_path: &str) -> Result<Url, AnyError> {
   Ok(main_module)
 }
 
+fn load_runtime(runtime: &mut deno_core::JsRuntime) -> Result<(), AnyError> {
+  const RUNTIME_LIB: &str = include_str!("./runtime.js");
+  runtime.execute_script_static("[mustangjs:runtime.js]", RUNTIME_LIB).unwrap();
+  Ok(())
+}
+
 async fn mustang_js(file_path: &str) -> Result<(), AnyError> {
   let main_module = get_main_module(file_path)?;
   let mut js_runtime = deno_core::JsRuntime::new(deno_core::RuntimeOptions {
       module_loader: Some(Rc::new(deno_core::FsModuleLoader)),
       ..Default::default()
   });
+  load_runtime(&mut js_runtime)?;
 
   let mod_id = js_runtime.load_main_module(&main_module, None).await?;
   let result = js_runtime.mod_evaluate(mod_id);
